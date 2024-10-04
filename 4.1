@@ -1,0 +1,39 @@
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+#include <fstream>  
+
+using namespace std;
+
+const double PI = 3.141592653589793;
+
+int main() {
+    double r = 5.00;
+    double dt = 0.05;
+    double start_time = 3.00;
+    double T = 12.5;
+
+    ofstream file("wyniki.txt");
+    if (!file.is_open()) {
+        cout << "Nie można otworzyć pliku do zapisu!" << endl;
+        return 1;
+    }
+    
+    file << fixed << setprecision(2);
+
+    for (double t = start_time; t <= T; t += dt) {
+        double x = r * sin(2 * PI * t / T);
+        double y = r * cos(2 * PI * t / T);
+
+        if (y > x) {
+            file << "Czas, w którym y > x: " << t - start_time << " sekund" << endl;
+            break;
+        }
+    }
+    
+    file.close();
+
+    cout << "Wyniki zostały zapisane do pliku wyniki.txt" << endl;
+
+    return 0;
+}
