@@ -1,72 +1,66 @@
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 #include <fstream>  
+
 using namespace std;
+
 const double PI = 3.141592653589793;
 
-
-void get_coordinates(double t, double v, double omega, double &x, double &y) {
-    double r = v * t; 
-    x = r * sin(omega * t);  
-    y = r * cos(omega * t);  
+double promien (double v, double t) {
+  double r = v*t;
+  return r;
 }
 
+void wspolrzedne(double r, double t, double T, double &x, double &y){
+  x = r*sin(2*PI*t/T);
+  y = r*cos(2*PI*t/T);
+}
 
-double distance(double x1, double y1, double x2, double y2) {
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));  
+double odleglosc(double stareX,double x,double stareY,double y){
+  double dlugoscSumaryczna = sqrt(pow((x-stareX),2)+pow((y-stareY),2));
+  return dlugoscSumaryczna;
 }
 
 int main() {
+  double v = 1;
+  double t = 0;
+  double T = 10;
+  double dt = 0.5;
+  
+  double x = 0.0; 
+  double stareX = 0.0;
+  double y= 0.0;
+  double stareY = 0.0;
+  double calkowitaDlugosc = 0;
+
+  fstream plik;
+  plik.open("wyniki.txt", ios::out);
+  if(!plik.is_open()) {
+    cout << "plik sie nie otwiera" << "\n";
+  }
+  
+  // dla t i x-ow i y-ow rownych 0
+  double r = promien(v, t); 
+  wspolrzedne(r, t, T, stareX, stareY);
+
+  plik << t << "\t" << stareX << "\t" << stareY << "\t" << calkowitaDlugosc << "\n";
+  
+  while(t <= T) {
+
+    t += dt;
+    r = promien(v, t);
+    wspolrzedne(r, t, T, x, y);
+    double dlugoscSumaryczna = odleglosc(stareX, x, stareY, y);
+    calkowitaDlugosc += dlugoscSumaryczna;
+
+    plik << t << "\t" << x << "\t" << y << "\t" << calkowitaDlugosc << "\n";
     
-    double T = 10;          
-    double v = 1;           
-    double dt = 0.5;        
-    double t_max = 10;      
-    double omega = 2 * PI / T;  
+    stareX = x;
+    stareY = y;
+  }
 
-    
-    ofstream file("wyniki.txt");  
-    if (!file.is_open()) {
-        cerr << "Nie można otworzyć pliku do zapisu!" << endl;
-        return 1;
-    }
-
-    
-    file << "Czas (s)\tX\tY\tOdleglosc sumaryczna\n";
-
-    
-    double total_distance = 0.0;
-    double t = 0.0;
-
-    
-    double x_prev, y_prev, x, y;
-    get_coordinates(t, v, omega, x_prev, y_prev);  
-
-    
-    file << t << "\t" << x_prev << "\t" << y_prev << "\t" << total_distance << "\n";
-
-    
-    while (t <= t_max) {
-        t += dt;  
-        get_coordinates(t, v, omega, x, y);
-
-        
-        double dist = distance(x_prev, y_prev, x, y);
-        total_distance += dist;  
-
-        
-        file << t << "\t" << x << "\t" << y << "\t" << total_distance << "\n";
-
-        
-        x_prev = x;
-        y_prev = y;
-    }
-
-    
-    file.close();
-
-    
-    cout << "Sumaryczna długość toru mrówki: " << total_distance << endl;
-
-    return 0;
+  plik.close();
+  cout << calkowitaDlugosc << "\n";
 }
+  
